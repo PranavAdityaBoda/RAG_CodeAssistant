@@ -1,0 +1,6 @@
+streamlit==1.41.1
+requests==2.32.3
+urllib3==2.2.3
+charset-normalizer==3.3.2
+pandas==2.2.3
+reportlab==4.2.5
