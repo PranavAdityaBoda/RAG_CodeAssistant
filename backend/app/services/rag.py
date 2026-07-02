@@ -35,7 +35,7 @@ Prose only, no bullet padding. Use `code spans` for symbols and paths.
 
 # Distance threshold, Chroma cosine distance above this means the question
 # probably has nothing to do with the ingested repo
-_MAX_RELEVANT_DISTANCE = 0.7
+_MAX_RELEVANT_DISTANCE = 1.2
 
 _EXPAND_SYS = """\
 Given a question about a codebase, output 2 alternative search queries.
