@@ -9,7 +9,7 @@ GET  /api/github/status  , returns connected GitHub username for a token
 
 All routes delegate to services/oauth.py and services/github_agent.py.
 """
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import RedirectResponse
 
 from app.core.config import settings
@@ -57,11 +57,10 @@ def github_callback(code: str, state: str):
 
 
 @router.get("/status", response_model=OAuthStatus)
-def github_status(token: str) -> OAuthStatus:
-    """
-    Returns the GitHub user info for a given token.
-    Used by the UI to display who is connected.
-    """
+def github_status(request: Request) -> OAuthStatus:
+    """Returns GitHub user info. Token passed via Authorization: Bearer header."""
+    auth = request.headers.get("Authorization", "")
+    token = auth.removeprefix("Bearer ").strip()
     if not token:
         return OAuthStatus(connected=False)
     try:

@@ -1,15 +1,16 @@
 """
 Tiny HTTP client wrapping calls to the FastAPI backend.
 
-Streamlit app code itself never touches URLs or response parsing directly
-and the base URL only needs to change in one place
+Keeping all requests.* calls in one module means the Streamlit app code
+itself never touches URLs or response parsing directly, and the base URL
+only needs to change in one place.
 """
 import os
 
 import requests
 
 BACKEND_URL = os.environ.get("BACKEND_URL", "http://127.0.0.1:8000")
-_TIMEOUT_SECONDS = 300  
+_TIMEOUT_SECONDS = 300  # ingestion can take a while on larger repos
 
 
 class BackendError(Exception):
@@ -126,10 +127,9 @@ def get_github_login_url() -> str:
 
 
 def get_github_status(token: str) -> dict:
-    """Returns OAuthStatus for the given token (connected, login, name, avatar)."""
     response = requests.get(
         f"{BACKEND_URL}/api/github/status",
-        params={"token": token},
+        headers={"Authorization": f"Bearer {token}"},
         timeout=10,
     )
     if response.status_code != 200:
