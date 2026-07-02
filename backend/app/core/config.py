@@ -1,23 +1,16 @@
-"""
-configuration for backend
-"""
 from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
     app_name: str = "CodeLens"
-    environment: str = "local" 
+    environment: str = "local"
 
-    # --- Storage paths ---
-    # Stored at ../data relative to the backend/ working directory so
-    # WatchFiles never sees cloned repos and triggers a spurious reload.
     data_dir: Path = Path("../data")
     clone_dir: Path = Path("../data/clones")
     chroma_dir: Path = Path("../data/chroma")
     sqlite_path: Path = Path("../data/app.db")
 
-    # --- Ingestion limits ---
     max_files_per_repo: int = 300
     max_file_size_bytes: int = 300_000
     clone_depth: int = 1
@@ -33,15 +26,12 @@ class Settings(BaseSettings):
         "site-packages", ".mypy_cache", ".tox", "coverage",
     )
 
-    # --- Chunking ---
     fallback_chunk_lines: int = 60
     fallback_chunk_overlap: int = 10
 
-    # --- Embeddings ---
     embedding_model_name: str = "all-MiniLM-L6-v2"
     use_fake_embeddings: bool = False
 
-    # --- LLM (Groq, free tier) ---
     groq_api_key: str = ""
     groq_fast_model: str = "llama-3.1-8b-instant"
     groq_reasoning_model: str = "llama-3.3-70b-versatile"
@@ -50,15 +40,10 @@ class Settings(BaseSettings):
     summarise_batch_size: int = 6
     qa_top_k: int = 6
 
-    # --- CORS ---
-    # Comma-separated list of allowed origins. Override for deployment.
-    # e.g. ALLOWED_ORIGINS=https://your-frontend.up.railway.app
-    allowed_origins: tuple[str, ...] = (
-        "http://localhost:8501",
-        "http://127.0.0.1:8501",
-    )
+    # Plain comma-separated string to avoid pydantic JSON parsing issues
+    # e.g. ALLOWED_ORIGINS=https://a.up.railway.app,https://b.up.railway.app
+    allowed_origins_str: str = "http://localhost:8501,http://127.0.0.1:8501"
 
-    # --- GitHub OAuth ---
     github_client_id: str = ""
     github_client_secret: str = ""
     github_redirect_uri: str = "http://localhost:8000/api/github/callback"
@@ -73,6 +58,13 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
+    @property
+    def allowed_origins(self) -> list[str]:
+        origins = [o.strip() for o in self.allowed_origins_str.split(",") if o.strip()]
+        for local in ("http://localhost:8501", "http://127.0.0.1:8501"):
+            if local not in origins:
+                origins.append(local)
+        return origins
 
-# Singleton, import this everywhere instead of constructing Settings() again.
+
 settings = Settings()
