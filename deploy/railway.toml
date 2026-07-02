@@ -1,0 +1,24 @@
+# Railway deployment config
+# Deploy both services from this repo using Railway's monorepo support.
+# Set all environment variables in the Railway dashboard, not here.
+
+[build]
+builder = "DOCKERFILE"
+
+[[services]]
+name = "codelens-backend"
+source = "backend"
+dockerfilePath = "backend/Dockerfile"
+
+[services.deploy]
+startCommand = "uvicorn app.main:app --host 0.0.0.0 --port 8000"
+healthcheckPath = "/health"
+restartPolicyType = "ON_FAILURE"
+
+[[services]]
+name = "codelens-frontend"
+source = "frontend"
+dockerfilePath = "frontend/Dockerfile"
+
+[services.deploy]
+startCommand = "streamlit run streamlit_app.py --server.address=0.0.0.0 --server.port=8501 --server.headless=true"
